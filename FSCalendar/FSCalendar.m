@@ -51,6 +51,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
 @property (strong, nonatomic) NSCalendar *gregorian;
 @property (strong, nonatomic) NSDateFormatter *formatter;
 @property (strong, nonatomic) NSTimeZone *timeZone;
+@property (strong, nonatomic) NSCalendar *chineseGregorian;
 
 @property (weak  , nonatomic) UIView                     *contentView;
 @property (weak  , nonatomic) UIView                     *daysContainer;
@@ -154,6 +155,9 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     _formatter.dateFormat = @"yyyy-MM-dd";
     _locale = [NSLocale currentLocale];
     _timeZone = [NSTimeZone defaultTimeZone];
+    
+    _chineseGregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierChinese];
+    _chineseGregorian.locale = [NSLocale localeWithLocaleIdentifier:@""];
     _firstWeekday = 1;
     [self invalidateDateTools];
     
@@ -1382,6 +1386,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     cell.image = [self.dataSourceProxy calendar:self imageForDate:date];
     cell.numberOfEvents = [self.dataSourceProxy calendar:self numberOfEventsForDate:date];
     cell.titleLabel.text = [self.dataSourceProxy calendar:self titleForDate:date] ?: @([self.gregorian component:NSCalendarUnitDay fromDate:date]).stringValue;
+    cell.date = date;
     cell.subtitle  = [self.dataSourceProxy calendar:self subtitleForDate:date];
     cell.selected = [_selectedDates containsObject:date];
     cell.dateIsToday = self.today?[self.gregorian isDate:date inSameDayAsDate:self.today]:NO;

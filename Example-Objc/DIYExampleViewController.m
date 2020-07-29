@@ -19,6 +19,9 @@
 @property (strong, nonatomic) NSCalendar *gregorian;
 @property (strong, nonatomic) NSDateFormatter *dateFormatter;
 
+@property (strong, nonatomic) UIButton *test;
+
+
 - (void)configureCell:(FSCalendarCell *)cell forDate:(NSDate *)date atMonthPosition:(FSCalendarMonthPosition)position;
 
 @end
@@ -48,14 +51,19 @@
     calendar.allowsMultipleSelection = YES;
     [view addSubview:calendar];
     self.calendar = calendar;
-    
+    self.calendar.locale = [NSLocale localeWithLocaleIdentifier:@"zh-CN"];
+    self.calendar.adjustsBoundingRectWhenChangingMonths = NO;
+    self.calendar.placeholderType = FSCalendarPlaceholderTypeFillHeadTail;
+    self.calendar.appearance.headerMinimumDissolvedAlpha = 0;
+    self.calendar.appearance.caseOptions = FSCalendarCaseOptionsWeekdayUsesSingleUpperCase;
     calendar.calendarHeaderView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.1];
     calendar.calendarWeekdayView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.1];
     calendar.appearance.eventSelectionColor = [UIColor whiteColor];
     calendar.appearance.eventOffset = CGPointMake(0, -7);
     calendar.today = nil; // Hide the today circle
     [calendar registerClass:[DIYCalendarCell class] forCellReuseIdentifier:@"cell"];
-    
+    [self.calendar addObserver:self forKeyPath:@"scope" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
+
     UIPanGestureRecognizer *scopeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:calendar action:@selector(handleScopeGesture:)];
     [calendar addGestureRecognizer:scopeGesture];
     
@@ -75,6 +83,7 @@
     [attributedText appendAttributedString:[NSAttributedString attributedStringWithAttachment:attatchment]];
     self.eventLabel.attributedText = attributedText.copy;
     
+   
 }
 
 - (void)viewDidLoad
@@ -94,6 +103,30 @@
     
     // For UITest
     self.calendar.accessibilityIdentifier = @"calendar";
+    
+    self.test = [UIButton buttonWithType:UIButtonTypeCustom];
+       [self.test setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+       [self.test setTitleColor:[UIColor yellowColor] forState:UIControlStateSelected];
+       [self.test setTitle:@"展开" forState:UIControlStateNormal];
+       [self.test setTitle:@"收起" forState:UIControlStateSelected];
+       [self.test addTarget:self action:@selector(testEventHandler:) forControlEvents:UIControlEventTouchUpInside];
+       [self.view addSubview:self.test];
+       self.test.frame = CGRectMake(100, 500, 200, 50);
+}
+
+- (void)testEventHandler:(UIButton *)sender{
+    [sender setSelected:sender.isSelected];
+    if (self.calendar.scope == FSCalendarScopeMonth) {
+           [self.calendar setScope:FSCalendarScopeWeek animated:YES];
+    } else {
+           [self.calendar setScope:FSCalendarScopeMonth animated:YES];
+    }
+}
+
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+   FSCalendarScope oldScope = [change[NSKeyValueChangeOldKey] unsignedIntegerValue];
+   FSCalendarScope newScope = [change[NSKeyValueChangeNewKey] unsignedIntegerValue];
 }
 
 - (void)dealloc
@@ -131,6 +164,8 @@
 {
     [self configureCell:cell forDate:date atMonthPosition:monthPosition];
 }
+
+
 
 - (NSInteger)calendar:(FSCalendar *)calendar numberOfEventsForDate:(NSDate *)date
 {

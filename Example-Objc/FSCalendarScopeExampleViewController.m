@@ -7,7 +7,7 @@
 //
 
 #import "FSCalendarScopeExampleViewController.h"
-
+#import "FSChineseCalendarCell.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FSCalendarScopeExampleViewController()<UITableViewDataSource,UITableViewDelegate,FSCalendarDataSource,FSCalendarDelegate,UIGestureRecognizerDelegate>
@@ -59,11 +59,11 @@ NS_ASSUME_NONNULL_END
     
     // While the scope gesture begin, the pan gesture of tableView should cancel.
     [self.tableView.panGestureRecognizer requireGestureRecognizerToFail:panGesture];
-    
+    [self.calendar registerClass:NSClassFromString(@"FSChineseCalendarCell") forCellReuseIdentifier:@"FSChineseCalendarCell"];
     [self.calendar addObserver:self forKeyPath:@"scope" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:_KVOContext];
-    self.calendar.placeholderType = FSCalendarPlaceholderTypeNone;
+    self.calendar.placeholderType = FSCalendarPlaceholderTypeFillHeadTail;
     self.calendar.scope = FSCalendarScopeWeek;
-    
+    self.calendar.dataSource = self;
     [self.calendar selectDate:[NSDate date] scrollToDate:YES];
     
     // For UITest
@@ -88,6 +88,11 @@ NS_ASSUME_NONNULL_END
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+- (__kindof FSCalendarCell *)calendar:(FSCalendar *)calendar cellForDate:(NSDate *)date atMonthPosition:(FSCalendarMonthPosition)position{
+    FSChineseCalendarCell *cell = [calendar dequeueReusableCellWithIdentifier:@"FSChineseCalendarCell" forDate:date atMonthPosition:position];
+    return cell;
 }
 
 #pragma mark - <UIGestureRecognizerDelegate>

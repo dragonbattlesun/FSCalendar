@@ -8,6 +8,8 @@
 
 #import "DIYCalendarCell.h"
 #import "FSCalendarExtensions.h"
+#import "FSCalendarAppearance.h"
+#import "NSDate+Lunar.h"
 
 @implementation DIYCalendarCell
 
@@ -29,6 +31,13 @@
         self.backgroundView = [[UIView alloc] initWithFrame:self.bounds];
         self.backgroundView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.1];
         
+        UILabel *chineseText = [[UILabel alloc] initWithFrame:CGRectMake(0, self.frame.size.height - 12, CGRectGetWidth(self.frame), 12)];
+        self.chineseLabel = chineseText;
+        self.chineseLabel.font = [UIFont systemFontOfSize:12.0f];
+        self.chineseLabel.textColor = [self preferredTitleSelectionColor];
+        self.chineseLabel.textAlignment = NSTextAlignmentCenter;
+        [self.contentView addSubview:self.chineseLabel];
+        
     }
     return self;
 }
@@ -41,7 +50,7 @@
     self.backgroundView.frame = CGRectInset(self.bounds, 1, 1);
     self.circleImageView.frame = self.backgroundView.frame;
     self.selectionLayer.frame = self.bounds;
-    
+    self.chineseLabel.text = [self.date lunar_day_chinese];
     if (self.selectionType == SelectionTypeMiddle) {
         
         self.selectionLayer.path = [UIBezierPath bezierPathWithRect:self.selectionLayer.bounds].CGPath;
@@ -68,8 +77,9 @@
     // Override the build-in appearance configuration
     if (self.isPlaceholder) {
         self.titleLabel.textColor = [UIColor lightGrayColor];
-        self.eventIndicator.hidden = YES;
     }
+    self.eventIndicator.hidden = YES;
+    self.chineseLabel.textColor = self.colorForCellFill;
 }
 
 - (void)setSelectionType:(SelectionType)selectionType
@@ -78,6 +88,13 @@
         _selectionType = selectionType;
         [self setNeedsLayout];
     }
+}
+
+- (UIColor *)colorForCellFill{
+    if (self.selected) {
+        return [UIColor whiteColor];
+    }
+    return [UIColor blackColor];
 }
 
 @end

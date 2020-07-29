@@ -16,6 +16,8 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
 
 #pragma mark - Public properties
 
+@property (weak, nonatomic)  NSDate *date;
+
 /**
  The day text label of the cell
  */

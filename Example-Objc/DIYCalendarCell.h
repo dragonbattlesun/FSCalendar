@@ -25,4 +25,6 @@ typedef NS_ENUM(NSUInteger, SelectionType) {
 
 @property (assign, nonatomic) SelectionType selectionType;
 
+@property (weak, nonatomic) UILabel *chineseLabel;
+
 @end
